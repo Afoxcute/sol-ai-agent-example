@@ -35,6 +35,8 @@ import {
   getOwnedAllDomains,
   resolveAllDomains,
   create_gibwork_task,
+  createCrossmintWallet,
+  getCrossmintWallet,
 } from "../tools";
 import {
   CollectionDeployment,
@@ -336,5 +338,13 @@ export class SolanaAgentKit {
       tokenAmount,
       payer ? new PublicKey(payer) : undefined,
     );
+  }
+
+  async createCrossmintWallet(linkedUser: string, apiKey: string): Promise<any> {
+    return createCrossmintWallet(this, linkedUser, apiKey);
+  }
+
+  async getCrossmintWallet(walletId: string, apiKey: string): Promise<any> {
+    return getCrossmintWallet(this, walletId, apiKey);
   }
 }

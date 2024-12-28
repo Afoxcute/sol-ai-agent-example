@@ -10,6 +10,7 @@ import { create_image } from "../tools/create_image";
 import { BN } from "@coral-xyz/anchor";
 import { FEE_TIERS } from "../tools";
 import { toJSON } from "../utils/toJSON";
+import { createCrossmintWallet, getCrossmintWallet } from "../tools/crossmint_embedded_wallet";
 
 export class SolanaBalanceTool extends Tool {
   name = "solana_balance";
@@ -1229,6 +1230,40 @@ export class SolanaCreateGibworkTask extends Tool {
   }
 }
 
+export class SolanaEmbeddedWalletTool extends Tool {
+  name = "solana_embedded_wallet";
+  description = `Create and manage an embedded wallet using Crossmint's API.
+
+  Inputs (input is a JSON string):
+  linkedUser: string, e.g., "email:user@example.com" (required)
+  apiKey: string, e.g., "sk_..." (required)`;
+
+  constructor(private solanaKit: SolanaAgentKit) {
+    super();
+  }
+
+  protected async _call(input: string): Promise<string> {
+    try {
+      const parsedInput = JSON.parse(input);
+      const { linkedUser, apiKey } = parsedInput;
+
+      const walletResponse = await this.solanaKit.createCrossmintWallet(linkedUser, apiKey);
+
+      return JSON.stringify({
+        status: "success",
+        walletId: walletResponse.walletId,
+        address: walletResponse.address,
+      });
+    } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
 export function createSolanaTools(solanaKit: SolanaAgentKit) {
   return [
     new SolanaBalanceTool(solanaKit),
@@ -1263,5 +1298,6 @@ export function createSolanaTools(solanaKit: SolanaAgentKit) {
     new SolanaGetMainDomain(solanaKit),
     new SolanaResolveAllDomainsTool(solanaKit),
     new SolanaCreateGibworkTask(solanaKit),
+    new SolanaEmbeddedWalletTool(solanaKit),
   ];
 }
